@@ -37,19 +37,28 @@ class pm_trangellmellat extends PaymentRoot{
         $liveurlhost = $uri->toString(array("scheme",'host', 'port'));
         $return = $liveurlhost.SEFLink("index.php?option=com_jshopping&controller=checkout&task=step7&act=return&js_paymentclass=".$pm_method->payment_class).'&orderId='. $order->order_id;		
 		$notify_url2 = $liveurlhost.SEFLink("index.php?option=com_jshopping&controller=checkout&task=step2&act=notify&js_paymentclass=".$pm_method->payment_class."&no_lang=1");	
+		
 		//====================================================== 
-		if (!isset($MerchantId)) {	
+		$terminalId = $pmconfigs['melatterminalId'];
+		$userName = $pmconfigs['melatuser'];
+		$userPassword = $pmconfigs['melatpass'];
+		
+		if (
+			(!isset($terminalId) || $terminalId == '') and
+			(!isset($userName) || $userName == '') and
+			(!isset($userPassword) || $userPassword == '')
+		) {	
 			$app->redirect($notify_url2, '<h2>لطفا تنظیمات درگاه ملت را بررسی کنید</h2>', $msgType='Error'); 
 		}
 		
 		$dateTime = JFactory::getDate();
 			
 		$fields = array(
-			'terminalId' => $pmconfigs['melatterminalId'],
-			'userName' => $pmconfigs['melatuser'],
-			'userPassword' => $pmconfigs['melatpass'],
+			'terminalId' => $terminalId,
+			'userName' => $userName,
+			'userPassword' => $userPassword,
 			'orderId' => time(),
-			'amount' => $this->fixOrderTotal($order),
+			'amount' => round($this->fixOrderTotal($order),0),
 			'localDate' => $dateTime->format('Ymd'),
 			'localTime' => $dateTime->format('His'),
 			'additionalData' => '',
@@ -184,7 +193,7 @@ class pm_trangellmellat extends PaymentRoot{
         $params['order_id'] = $oId;
         $params['hash'] = "";
         $params['checkHash'] = 0;
-        $params['checkReturnParams'] = 0;
+        $params['checkReturnParams'] = 1;
 		return $params;
     }
     
